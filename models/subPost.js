@@ -10,9 +10,9 @@ const subPostSchema = new mongoose.Schema({
         required:true
     },
     imageUrls:[{
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         // required: true
-        ref:'Image'
+     
     }],
     
     videoUrls:[{

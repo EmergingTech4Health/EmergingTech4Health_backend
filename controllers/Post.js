@@ -1,6 +1,7 @@
 const Post = require('../models/Post');
-const Image = require('../models/Image');
+// const Image = require('../models/Image');
 const Video = require('../models/Video');
+const Category= require('../models/Category');
 const { uploadImageToCloudinary } = require('../utils/imageUploader');
 // Create a new post
 exports.createPost = async (req, res) => {
@@ -239,4 +240,15 @@ exports.deletePost = async (req, res) => {
 
 
 
+}
+
+// get all posts
+exports.getAllPosts = async (req, res) => {
+    try {
+        const posts = await Post.find();
+        res.status(200).json({ posts });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+    }
 }
