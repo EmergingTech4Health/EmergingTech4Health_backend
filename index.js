@@ -8,7 +8,7 @@ const postRoutes = require('./routes/Post')
 const cors = require("cors");
 const { cloudinaryConnect } = require("./config/cloudinary");
 const fileUpload = require("express-fileupload");
-
+const cookieParser = require("cookie-parser");
 // Load environment variables from .env file
 dotenv.config()
 
@@ -34,15 +34,15 @@ app.use(cookieParser());
 // 	})
 // );
 
-// app.use(
-// 	fileUpload({
-// 		useTempFiles: true,
-// 		tempFileDir: "/tmp/",
-// 	})
-// );
+app.use(
+	fileUpload({
+		useTempFiles: true,
+		tempFileDir: "/tmp/",
+	}) 
+);
 
-// // Connecting to cloudinary
-// cloudinaryConnect();
+// Connecting to cloudinary
+cloudinaryConnect();
 app.use("/api/v1/auth", userRoutes);
 app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/profile", profileRoutes);
@@ -52,5 +52,5 @@ app.get('/', (req , res)=>{
 })
 
 app.listen(PORT, ()=>{
-    console.log(`Emerging tech server is up and running on port ${port}`)
+    console.log(`Emerging tech server is up and running on port ${PORT}`)
 })

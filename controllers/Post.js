@@ -1,8 +1,8 @@
 const Post = require('../models/Post');
 // const Image = require('../models/Image');
-const Video = require('../models/Video');
+// const Video = require('../models/Video');
 const Category= require('../models/Category');
-const { uploadImageToCloudinary } = require('../utils/imageUploader');
+const {uploadImageToCloudinary} = require('../utils/imageUploader');
 // Create a new post
 exports.createPost = async (req, res) => {
   try {

@@ -1,6 +1,6 @@
 const SubPost = require('../models/subPost');
 const Post = require('../models/Post');
-const uploadImageToCloudinary = require('../utils/uploadImageToCloudinary');
+const {uploadImageToCloudinary} = require('../utils/imageUploader');
 exports.createSubPost = async (req, res) => {
     try {
         const { postId,sectionName, subSectionContent, imageUrls } = req.body;

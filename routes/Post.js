@@ -21,9 +21,9 @@ const {
     updateMilestone,
     deleteMilestone,
 } = require('../controllers/Milestone')
-const {
-    addVideo,deleteVideo
-} = require('../controllers/Video')
+// const {
+//     addVideo,deleteVideo
+// } = require('../controllers/Video')
 
 // ********************************************************************************************************
 //                              POST ROUTES
@@ -55,7 +55,7 @@ router.delete('/deleteMilestone',auth, isSuperAdmin, deleteMilestone);
 // ********************************************************************************************************
 //                              VIDEO ROUTES
 // ********************************************************************************************************
-router.post("/addVideo", auth , addVideo);
-router.delete("/deleteVideo", auth , deleteVideo);
+// router.post("/addVideo", auth , addVideo);
+// router.delete("/deleteVideo", auth , deleteVideo);
 
 module.exports= router; 

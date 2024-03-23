@@ -6,7 +6,7 @@ const {
     createProfile,
     updateProfile,
     deleteProfile,
-    getAllProfiles,
+    showAllProfiles,
 } = require('../controllers/Profile')
 
 // ********************************************************************************************************
@@ -16,6 +16,6 @@ const {
 router.delete("/deleteProfile", auth , isSuperAdmin , deleteProfile);
 router.post("/createProfile", auth ,  createProfile);
 router.put("/updateProfile", auth , updateProfile);
-router.get('/profiles',  getAllProfiles);
+router.get('/profiles',  showAllProfiles);
 
 module.exports = router
