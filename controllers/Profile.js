@@ -55,9 +55,9 @@ exports.createProfile = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
     try {
-        const { name, email, about, socialLinks } = req.body;
+        const { profileId,name, email, about, socialLinks } = req.body;
         const profilePic = req.file; // Assuming you're uploading a single image as profile picture
-        const profileId = req.params.id; // Assuming you get profile ID from request parameters
+        // const profileId = req.params.id; // Assuming you get profile ID from request parameters
 
         // Fetch the existing profile
         const existingProfile = await Profile.findById(profileId);
@@ -115,7 +115,7 @@ exports.updateProfile = async (req, res) => {
 
 exports.deleteProfile = async (req, res) => {
     try {
-        const profileId = req.params.id; // Assuming you get profile ID from request parameters
+        const {profileId} = req.body; // Assuming you get profile ID from request parameters
 
         // Find and delete the profile
         const deletedProfile = await Profile.findByIdAndDelete(profileId);

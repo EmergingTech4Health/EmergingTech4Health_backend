@@ -1,5 +1,6 @@
 const Category = require("./../models/Category");
 
+// Add validation to category if it exists or not
 exports.addCategory = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -41,8 +42,8 @@ exports.showAllCategories = async (req, res) => {
 
 exports.updateCategory = async (req, res) => {
   try {
-    const { name, description } = req.body;
-    const categoryId = req.params.id; // Assuming you get category ID from request parameters
+    const { categoryId ,name, description } = req.body;
+    // const categoryId = req.params.id; // Assuming you get category ID from request parameters
 
     // Fetch the existing category
     const existingCategory = await Category.findById(categoryId);
@@ -87,15 +88,17 @@ exports.showCategoryPage = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Category not found" });
     }
-    // Handle the case when there are no Posts or projects
-    if (selectedCategory.courses.length === 0) {
-      console.log("No Projects or posts found for the selected category.");
+    
+    // Handle the case when there are no projects
+    if (selectedCategory.projects.length === 0) {
+      console.log("No projects found for the selected category.");
       return res.status(404).json({
         success: false,
-        message: "No Projects or posts found for the selected category.",
+        message: "No projects found for the selected category.",
       });
     }
-    // Get courses for other categories
+    
+    // Get projects for other categories
     const categoriesExceptSelected = await Category.find({
       _id: { $ne: categoryId },
     });
@@ -106,6 +109,13 @@ exports.showCategoryPage = async (req, res) => {
       .populate("projects")
       .exec();
     console.log("different category", differentCategory);
+
+    // Respond with the selected category and a different category
+    return res.status(200).json({
+      success: true,
+      selectedCategory: selectedCategory,
+      differentCategory: differentCategory
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -117,7 +127,7 @@ exports.showCategoryPage = async (req, res) => {
 
 exports.deleteCategory = async(req, res) => {
     try {
-        const categoryId = req.params.id;
+        const {categoryId} = req.body;
         if(!categoryId){
             return res.status(400).json({error: "Category ID is required"});
         }

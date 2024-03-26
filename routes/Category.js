@@ -16,8 +16,8 @@ const {
 
 router.post("/addCategory", auth , addCategory);
 router.get("/showAllCategories", showAllCategories);
-router.put("/updateCategory/:id", auth , updateCategory);
-router.delete("/deleteCategory/:id", auth , isSuperAdmin,deleteCategory);
+router.put("/updateCategory", auth , updateCategory);
+router.delete("/deleteCategory", auth , isSuperAdmin,deleteCategory);
 router.get('/showCategoryPage',  showCategoryPage);
 
 module.exports = router
