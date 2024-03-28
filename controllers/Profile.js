@@ -56,7 +56,7 @@ exports.createProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
     try {
         const { profileId,name, email, about, socialLinks } = req.body;
-        const profilePic = req.file; // Assuming you're uploading a single image as profile picture
+        const profilePic = req.files.displayPicture; // Assuming you're uploading a single image as profile picture
         // const profileId = req.params.id; // Assuming you get profile ID from request parameters
 
         // Fetch the existing profile
@@ -92,8 +92,11 @@ exports.updateProfile = async (req, res) => {
         }
         if (profilePic) {
             // Upload profile picture to Cloudinary
-            const result = await uploadImageToCloudinary(profilePic);
+            const result = await uploadImageToCloudinary(profilePic,
+                process.env.FOLDER_NAME,
+                1000,1000);
             existingProfile.profilePic = result.secure_url;
+            console.log('profilePic',existingProfile.profilePic);
         }
 
         // Save the updated profile
@@ -102,7 +105,7 @@ exports.updateProfile = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Profile updated successfully",
-            profile: updatedProfile
+            profile: updatedProfile.profilePic
         });
     } catch (error) {
         console.error(error);

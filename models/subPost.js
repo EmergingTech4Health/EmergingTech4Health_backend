@@ -1,5 +1,21 @@
 const mongoose= require('mongoose');
 
+const VideoSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    description: {
+        type:String, 
+        required:true
+    
+    },
+    videoUrl:{
+        type: String,
+        required: true
+    },
+    
+});
 const subPostSchema = new mongoose.Schema({
     sectionName:{
         type:String,
@@ -15,11 +31,9 @@ const subPostSchema = new mongoose.Schema({
      
     }],
     
-    videoUrls:[{
-        type: mongoose.Schema.Types.ObjectId,
-        // required: true
-        ref:'Video'
-    }],
+    videoUrls:[
+        VideoSchema
+    ],
 })
 
 module.exports = mongoose.model('SubPost', subPostSchema);

@@ -64,13 +64,13 @@ exports.createSubPost = async (req, res) => {
 // update subpost
 exports.updateSubPost = async (req, res) => {
     try {
-        const { postId,subPostId, sectionName, subSectionContent, imageUrls, videoUrls } = req.body;
-        if(!postId){
-            return res.status(400).json({
-                success: false,
-                message: "Post Id is required"
-            });
-        }
+        const { subPostId, sectionName, subSectionContent, imageUrls, videoUrls } = req.body;
+        // if(!postId){
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: "Post Id is required"
+        //     });
+        // }
        
         const existSubPost = await SubPost.findById(subPostId);
         if (!existSubPost) {
@@ -89,8 +89,8 @@ exports.updateSubPost = async (req, res) => {
             existSubPost.videoUrls = videoUrls;
         }
         const updatedSubPost = await existSubPost.save();
-        const updatePost = await Post.findByIdAndUpdate(postId).populate('subPost');
-        console.log(updatePost);
+        // const updatePost = await Post.findByIdAndUpdate(postId).populate('subPost');
+        // console.log(updatePost);
     
         return res.status(200).json({
             success: true,

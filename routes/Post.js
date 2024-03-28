@@ -7,6 +7,7 @@ const {
     updatePost,
     deletePost,
     getAllPosts,
+    getSinglePost
 } = require('../controllers/Post')
 
 const {
@@ -33,6 +34,7 @@ router.post("/createPost", auth , createPost);
 router.put("/updatePost", auth , updatePost);
 router.delete("/deletePost", auth,isSuperAdmin , deletePost);
 router.get("/getAllPosts", getAllPosts);
+router.get("/getSinglePost", getSinglePost);
 
 
 // ********************************************************************************************************

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Profile = require('./Profile');
 
 const PostSchema = new mongoose.Schema({
     title: {
