@@ -14,7 +14,8 @@ const {
     createSubPost,
     updateSubPost,
     deleteSubPost,
-    removeImageFromSubPost
+    removeImageFromSubPost,
+   
 } = require('../controllers/subPost');
 
 const {

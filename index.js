@@ -9,6 +9,7 @@ const cors = require("cors");
 const { cloudinaryConnect } = require("./config/cloudinary");
 const fileUpload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
+
 // Load environment variables from .env file
 dotenv.config()
 

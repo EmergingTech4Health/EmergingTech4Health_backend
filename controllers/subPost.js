@@ -3,7 +3,10 @@ const Post = require('../models/Post');
 const {uploadImageToCloudinary} = require('../utils/imageUploader');
 exports.createSubPost = async (req, res) => {
     try {
-        const { postId,sectionName, subSectionContent, imageUrls } = req.body;
+        const { postId,sectionName, subSectionContent, 
+            // imageUrls
+        
+        } = req.body;
         if(!postId){
             return res.status(400).json({
                 success: false,
@@ -20,14 +23,27 @@ exports.createSubPost = async (req, res) => {
                 message: "Section Name and SubSection Content are required"
             });
         }
+       const images = req.files.images;
+    //    console.log("Images : ",images);
+        // if (!images || !images.data) {
+        //     return res.status(400).json({
+        //         success:false,
+        //         message:"Images field is required!"
+        //     });
+        // }
+        let uploadedImageUrls=[];
+        for(let i=0;i<images.length;i++){
+            const result = await uploadImageToCloudinary(images[i]);
+            uploadedImageUrls.push(result.secure_url);
+        };
          // Upload multiple images to Cloudinary
-         const uploadedImageUrls = [];
-         if (imageUrls && Array.isArray(imageUrls)) {
-             for (const imageUrl of imageUrls) {
-                 const result = await uploadImageToCloudinary(imageUrl);
-                 uploadedImageUrls.push(result.secure_url);
-             }
-         }
+        //  const uploadedImageUrls = [];
+        //  if (imageUrls && Array.isArray(imageUrls)) {
+        //      for (const imageUrl of imageUrls) {
+        //          const result = await uploadImageToCloudinary(imageUrl);
+        //          uploadedImageUrls.push(result.secure_url);
+        //      }
+        //  }
 
         const subPost = await SubPost.create({
             sectionName,
@@ -82,12 +98,22 @@ exports.updateSubPost = async (req, res) => {
         if (subSectionContent) {
             existSubPost.subSectionContent = subSectionContent;
         }
-        if (imageUrls) {
-            existSubPost.imageUrls = imageUrls;
-        }
+        // if (imageUrls) {
+        //     existSubPost.imageUrls = imageUrls;
+        // }
         if (videoUrls) {
             existSubPost.videoUrls = videoUrls;
         }
+        // Upload new images if any
+        const images = req.files.images;
+        let uploadedImageUrls = [];
+        for (let i = 0; i < images.length; i++) {
+            const result = await uploadImageToCloudinary(images[i]);
+            uploadedImageUrls.push(result.secure_url);
+        };
+        // Append the newly uploaded image URLs to existing ones
+        existSubPost.imageUrls = existSubPost.imageUrls ? [...existSubPost.imageUrls, ...uploadedImageUrls] : uploadedImageUrls;
+        
         const updatedSubPost = await existSubPost.save();
         // const updatePost = await Post.findByIdAndUpdate(postId).populate('subPost');
         // console.log(updatePost);
@@ -170,3 +196,4 @@ exports.removeImageFromSubPost = async (req, res) => {
         });
     }
 }
+
