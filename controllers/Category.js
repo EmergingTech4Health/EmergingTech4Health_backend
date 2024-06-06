@@ -1,5 +1,7 @@
 const Category = require("./../models/Category");
-
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
 // Add validation to category if it exists or not
 exports.addCategory = async (req, res) => {
   try {
@@ -76,8 +78,9 @@ exports.updateCategory = async (req, res) => {
 // Show a category Page
 
 exports.showCategoryPage = async (req, res) => {
+  const { categoryId } = req.params; // Extract category ID from URL parameters
   try {
-    const { categoryId } = req.body;
+    console.log(categoryId);
     const selectedCategory = await Category.findById(categoryId)
       .populate("projects")
       .exec();
@@ -124,6 +127,7 @@ exports.showCategoryPage = async (req, res) => {
     });
   }
 };
+
 
 exports.deleteCategory = async(req, res) => {
     try {

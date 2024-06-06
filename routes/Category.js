@@ -18,6 +18,6 @@ router.post("/addCategory", auth , addCategory);
 router.get("/showAllCategories", showAllCategories);
 router.put("/updateCategory", auth , updateCategory);
 router.delete("/deleteCategory", auth , isSuperAdmin,deleteCategory);
-router.get('/showCategoryPage',  showCategoryPage);
+router.get('/category/:categoryId', showCategoryPage); 
 
 module.exports = router
