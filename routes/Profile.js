@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const {auth, isAdmin , isSuperAdmin} = require('../middlewares/auth')
+const upload = require('../middlewares/multer')
 
 const {
     createProfile,
