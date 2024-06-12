@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 exports.createProfile = async (req, res) => {
     try {
         const { name, email, about, socialLinks = [] } = req.body;  // Provide default value as an empty array
-        const profilePic = req.file; // Assuming you're uploading a single image as profile picture
+        const profilePic = req.files.profilePic; // Assuming you're uploading a single image as profile picture
 
         // Check if required fields are provided
         if (!name || !email || !about) {
@@ -57,7 +57,7 @@ exports.createProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
     try {
         const { profileId, name, email, about, socialLinks } = req.body;
-        const profilePic = req.file; // Assuming you're uploading a single image as profile picture
+        const profilePic = req.files.profilePic; // Assuming you're uploading a single image as profile picture
 
         // Fetch the existing profile
         const existingProfile = await Profile.findById(profileId);
