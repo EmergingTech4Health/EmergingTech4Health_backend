@@ -256,7 +256,7 @@ exports.getAllPosts = async (req, res) => {
 }
 exports.getSinglePost = async (req , res)=>{
     try {
-        const {postId} = req.body;
+        const {postId} = req.params;
         const post = await Post.findById(postId);
         if (!post) {
             return res.status(404).json({ error: "Post not found" });
