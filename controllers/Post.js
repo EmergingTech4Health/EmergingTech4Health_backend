@@ -193,7 +193,7 @@ exports.updatePost = async (req, res) => {
             existPost.shortDesc = shortDesc;
         }
         if(references) {
-            existPost.refrences = references;
+            existPost.references = references;
         }
         if(contributors){
             existPost.contributors = contributors;

@@ -25,7 +25,7 @@ const PostSchema = new mongoose.Schema({
     //     // required: true
     //     ref:'Image'
     // }],
-    refrences:[{
+    references:[{
         type: String,
         // required: true
     }],
