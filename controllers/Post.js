@@ -254,10 +254,15 @@ exports.getAllPosts = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 }
-exports.getSinglePost = async (req , res)=>{
+exports.getSinglePost = async (req, res) => {
     try {
-        const {postId} = req.params;
-        const post = await Post.findById(postId);
+        const { postId } = req.params;
+        const post = await Post.findById(postId)
+            .populate('contributors')
+            .populate('category')
+            .populate('subPost')
+            .populate('milestones');
+
         if (!post) {
             return res.status(404).json({ error: "Post not found" });
         }
@@ -266,4 +271,4 @@ exports.getSinglePost = async (req , res)=>{
         console.error(error);
         res.status(500).json({ error: "Internal server error" });
     }
-}
+};
