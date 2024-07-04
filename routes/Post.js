@@ -22,6 +22,7 @@ const {
     createMilestone,
     updateMilestone,
     deleteMilestone,
+    getMilestones,
 } = require('../controllers/Milestone')
 // const {
 //     addVideo,deleteVideo
@@ -54,6 +55,7 @@ router.delete("/removeImageFromSubPost", auth, removeImageFromSubPost);
 router.post("/createMilestone", auth , createMilestone);
 router.put("/updateMilestone", auth , updateMilestone);
 router.delete('/deleteMilestone',auth, isSuperAdmin, deleteMilestone);
+router.get('/getMilestones', getMilestones)
 
 // ********************************************************************************************************
 //                              VIDEO ROUTES
