@@ -23,7 +23,7 @@ exports.createSubPost = async (req, res) => {
                 message: "Section Name and SubSection Content are required"
             });
         }
-       const images = req.files.images;
+    //    const images = req.files.images;
     //    console.log("Images : ",images);
         // if (!images || !images.data) {
         //     return res.status(400).json({
@@ -31,11 +31,14 @@ exports.createSubPost = async (req, res) => {
         //         message:"Images field is required!"
         //     });
         // }
-        let uploadedImageUrls=[];
-        for(let i=0;i<images.length;i++){
-            const result = await uploadImageToCloudinary(images[i]);
-            uploadedImageUrls.push(result.secure_url);
-        };
+        let uploadedImageUrls = [];
+        if (req.files && req.files.images) {
+            const images = req.files.images;
+            for (let i = 0; i < images.length; i++) {
+                const result = await uploadImageToCloudinary(images[i]);
+                uploadedImageUrls.push(result.secure_url);
+            }
+        }
          // Upload multiple images to Cloudinary
         //  const uploadedImageUrls = [];
         //  if (imageUrls && Array.isArray(imageUrls)) {
@@ -105,15 +108,16 @@ exports.updateSubPost = async (req, res) => {
             existSubPost.videoUrls = videoUrls;
         }
         // Upload new images if any
-        const images = req.files.images;
-        let uploadedImageUrls = [];
-        for (let i = 0; i < images.length; i++) {
-            const result = await uploadImageToCloudinary(images[i]);
-            uploadedImageUrls.push(result.secure_url);
-        };
-        // Append the newly uploaded image URLs to existing ones
-        existSubPost.imageUrls = existSubPost.imageUrls ? [...existSubPost.imageUrls, ...uploadedImageUrls] : uploadedImageUrls;
-        
+        if (req.files && req.files.images) {
+            const images = req.files.images;
+            let uploadedImageUrls = [];
+            for (let i = 0; i < images.length; i++) {
+                const result = await uploadImageToCloudinary(images[i]);
+                uploadedImageUrls.push(result.secure_url);
+            }
+            // Append the newly uploaded image URLs to existing ones
+            existSubPost.imageUrls = existSubPost.imageUrls ? [...existSubPost.imageUrls, ...uploadedImageUrls] : uploadedImageUrls;
+        }
         const updatedSubPost = await existSubPost.save();
         // const updatePost = await Post.findByIdAndUpdate(postId).populate('subPost');
         // console.log(updatePost);

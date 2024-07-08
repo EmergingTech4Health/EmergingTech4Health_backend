@@ -6,54 +6,151 @@ const Profile = require('../models/Profile');
 const {uploadImageToCloudinary} = require('../utils/imageUploader');
 // Create a new post
 exports.createPost = async (req, res) => {
-  try {
-      // Extract data from request body
-      const { title, shortDesc, content, references, contributors, category,grant } = req.body;
-
-      // Validate required fields
+    try {
+      const { title, shortDesc, content, references, contributors, category, grant } = req.body;
+  
       if (!title || !shortDesc || !content || !references || !contributors || !category || !grant) {
-          return res.status(400).json({ error: "Please provide all required fields" });
+        return res.status(400).json({ error: "Please provide all required fields" });
       }
-
-      // Check if contributors exist
-      const contributorsExist = await Profile.find({ _id: { $in: contributors } }).select('_id');
-      if (contributorsExist.length !== contributors.length) {
-          return res.status(400).json({ error: "One or more contributors do not exist" });
+  
+      // Parse JSON fields
+      const parsedContributors = JSON.parse(contributors);
+      const parsedReferences = JSON.parse(references);
+  
+      const contributorsExist = await Profile.find({ _id: { $in: parsedContributors } }).select('_id');
+      if (contributorsExist.length !== parsedContributors.length) {
+        return res.status(400).json({ error: "One or more contributors do not exist" });
       }
-
-      // Check if category exists
+  
       const categoryExist = await Category.findById(category).select('_id');
       if (!categoryExist) {
-          return res.status(400).json({ error: "Category does not exist" });
+        return res.status(400).json({ error: "Category does not exist" });
       }
-
-      // Create the post
+  
+      let imageUrl = null;
+      if (req.files && req.files.image) {
+        const result = await uploadImageToCloudinary(req.files.image);
+        imageUrl = result.secure_url;
+      }
+  
       const post = new Post({
-          title,
-          shortDesc,
-          content,
-          references,
-          contributors,
-          category,
-          grant
+        title,
+        shortDesc,
+        content,
+        references: parsedReferences,
+        contributors: parsedContributors,
+        category,
+        grant,
+        image: imageUrl,
       });
-
-      // Save the post
+  
       await post.save();
-
-      // Add post ID to all contributors
-      await Profile.updateMany({ _id: { $in: contributors } }, { $push: { projects: post._id } });
-
-      // Add post ID to category
+  
+      await Profile.updateMany({ _id: { $in: parsedContributors } }, { $push: { projects: post._id } });
       await Category.findByIdAndUpdate(category, { $push: { projects: post._id } });
-
-      // Return success response
+  
       return res.status(201).json({ message: "Post created successfully", post });
-  } catch (error) {
+    } catch (error) {
       console.error("Error creating post:", error);
       return res.status(500).json({ error: "Internal server error" });
+    }
+  };
+  
+  
+// update a post
+
+exports.updatePost = async (req, res) => {
+    try {
+      const { postId, title, shortDesc, content, references, contributors, category, grant } = req.body;
+      const existPost = await Post.findById(postId);
+      if (!existPost) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+  
+      // Parse JSON fields
+      const parsedContributors = JSON.parse(contributors);
+      const parsedReferences = JSON.parse(references);
+  
+      if (title) existPost.title = title;
+      if (content) existPost.content = content;
+      if (shortDesc) existPost.shortDesc = shortDesc;
+      if (references) existPost.references = parsedReferences;
+      if (contributors) existPost.contributors = parsedContributors;
+      if (category) existPost.category = category;
+      if (grant) existPost.grant = grant;
+  
+      if (req.files && req.files.image) {
+        const result = await uploadImageToCloudinary(req.files.image);
+        existPost.image = result.secure_url;
+      }
+  
+      const updatedPost = await existPost.save();
+      return res.status(200).json({ message: "Post updated successfully", updatedPost });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  };
+  
+  
+  
+  // delete a post
+  
+  exports.deletePost = async (req, res) => {
+      try {
+          const {postId, categoryId}= req.body;
+          const deletedPost = await Post.findByIdAndDelete(postId);
+          await Category.findByIdAndUpdate(categoryId ,{ $pull : { projects: postId } });
+          
+          if (!deletedPost) {
+              return res.status(404).json({ error: "Post not found" });
+          }
+          // await subPost.deleteMany({id:{ $in: deletedPost.subPost}});
+         return res.status(200).json({ message: "Post deleted successfully" });
+  
+  
+      } catch (error) {
+          console.error("Error deleting Post:", error)
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      })
+      }
+  
+  
+  
+  
   }
-};
+  
+  // get all posts
+  exports.getAllPosts = async (req, res) => {
+      try {
+          const posts = await Post.find();
+          res.status(200).json({ posts });
+      } catch (error) {
+          console.error(error);
+          res.status(500).json({ error: "Internal server error" });
+      }
+  }
+  exports.getSinglePost = async (req, res) => {
+      try {
+          const { postId } = req.params;
+          const post = await Post.findById(postId)
+              .populate('contributors')
+              .populate('category')
+              .populate('subPost')
+              .populate('milestones');
+  
+          if (!post) {
+              return res.status(404).json({ error: "Post not found" });
+          }
+          res.status(200).json({ post });
+      } catch (error) {
+          console.error(error);
+          res.status(500).json({ error: "Internal server error" });
+      }
+  };
 
 // // Upload images to a post
 // exports.uploadImage = async(req, res) => {
@@ -173,102 +270,3 @@ exports.createPost = async (req, res) => {
 //   }
 // };
 
-// update a post
-
-exports.updatePost = async (req, res) => {
-  try {
-    // const { postId } = req.params; // Extract post ID from request parameters
-        const { postId ,title, shortDesc, content, references, contributors, category, grant } = req.body; // Extract allowed fields from request body
-        const existPost = await Post.findById(postId);
-        if (!existPost) {
-            return res.status(404).json({ error: "Post not found" });
-        }
-        if (title) {
-            existPost.title = title;
-        }
-        if (content) {
-            existPost.content = content;
-        }
-        if(shortDesc){
-            existPost.shortDesc = shortDesc;
-        }
-        if(references) {
-            existPost.references = references;
-        }
-        if(contributors){
-            existPost.contributors = contributors;
-        }
-        if(category){
-            existPost.category = category;
-        }
-        if(grant){
-            existPost.grant = grant;
-        }
-        
-    
-        
-        const updatedPost = await existPost.save();
-        return res.status(200).json({ message: "Post updated successfully", updatedPost });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-// delete a post
-
-exports.deletePost = async (req, res) => {
-    try {
-        const {postId, categoryId}= req.body;
-        const deletedPost = await Post.findByIdAndDelete(postId);
-        await Category.findByIdAndUpdate(categoryId ,{ $pull : { projects: postId } });
-        
-        if (!deletedPost) {
-            return res.status(404).json({ error: "Post not found" });
-        }
-        // await subPost.deleteMany({id:{ $in: deletedPost.subPost}});
-       return res.status(200).json({ message: "Post deleted successfully" });
-
-
-    } catch (error) {
-        console.error("Error deleting Post:", error)
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    })
-    }
-
-
-
-
-}
-
-// get all posts
-exports.getAllPosts = async (req, res) => {
-    try {
-        const posts = await Post.find();
-        res.status(200).json({ posts });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal server error" });
-    }
-}
-exports.getSinglePost = async (req, res) => {
-    try {
-        const { postId } = req.params;
-        const post = await Post.findById(postId)
-            .populate('contributors')
-            .populate('category')
-            .populate('subPost')
-            .populate('milestones');
-
-        if (!post) {
-            return res.status(404).json({ error: "Post not found" });
-        }
-        res.status(200).json({ post });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal server error" });
-    }
-};
