@@ -3,8 +3,8 @@ const { uploadImageToCloudinary } = require('../utils/imageUploader');
 const mongoose = require('mongoose');
 exports.createProfile = async (req, res) => {
     try {
-        const { name, email, about, socialLinks = [] } = req.body;  // Provide default value as an empty array
-        const profilePic = req.files.profilePic; // Assuming you're uploading a single image as profile picture
+        const { name, email, about, socialLinks = [], qualifications, designation, AreaofInterest } = req.body;  // Provide default value as an empty array
+        const profilePic = req.files ? req.files.profilePic : null; // Check if files are provided and if profilePic exists
 
         // Check if required fields are provided
         if (!name || !email || !about) {
@@ -22,7 +22,7 @@ exports.createProfile = async (req, res) => {
             };
         }) : [];
 
-        // Upload profile picture to Cloudinary
+        // Upload profile picture to Cloudinary if it exists
         let profilePicUrl = "";
         if (profilePic) {
             const result = await uploadImageToCloudinary(profilePic);
@@ -35,7 +35,10 @@ exports.createProfile = async (req, res) => {
             email,
             about,
             profilePic: profilePicUrl,
-            socialLinks: validatedSocialLinks
+            socialLinks: validatedSocialLinks,
+            qualifications,
+            designation,
+            AreaofInterest
         });
 
         console.log(profileDetails);
@@ -54,10 +57,11 @@ exports.createProfile = async (req, res) => {
 
 
 
+
 exports.updateProfile = async (req, res) => {
     try {
-        const { profileId, name, email, about, socialLinks } = req.body;
-        const profilePic = req.files.profilePic; // Assuming you're uploading a single image as profile picture
+        const { profileId, name, email, about, socialLinks, qualifications, designation, AreaofInterest } = req.body;
+        const profilePic = req.files ? req.files.profilePic : null; // Check if files are provided and if profilePic exists
 
         // Fetch the existing profile
         const existingProfile = await Profile.findById(profileId);
@@ -99,6 +103,15 @@ exports.updateProfile = async (req, res) => {
             existingProfile.profilePic = result.secure_url;
             console.log('profilePic', existingProfile.profilePic);
         }
+        if (qualifications) {
+            existingProfile.qualifications = qualifications;
+        }
+        if (designation) {
+            existingProfile.designation = designation;
+        }
+        if (AreaofInterest) {
+            existingProfile.AreaofInterest = AreaofInterest;
+        }
 
         // Save the updated profile
         const updatedProfile = await existingProfile.save();
@@ -116,6 +129,7 @@ exports.updateProfile = async (req, res) => {
         });
     }
 }
+
 
 
 exports.deleteProfile = async (req, res) => {

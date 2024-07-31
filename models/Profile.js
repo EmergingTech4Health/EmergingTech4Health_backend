@@ -32,7 +32,19 @@ const ProfileSchema = new mongoose.Schema({
     projects: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Post'
-    }]
+    }],
+    qualifications: {
+        type: String,
+        required: true
+    },
+    designation: {
+        type: String,
+        required: true
+    },
+    AreaofInterest: {
+        type: String,
+        required: true
+    },
 });
 
 module.exports = mongoose.model('Profile', ProfileSchema);
