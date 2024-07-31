@@ -9,7 +9,7 @@ const cors = require("cors");
 const { cloudinaryConnect } = require("./config/cloudinary");
 const fileUpload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
-
+const publicationRoutes = require('./routes/Publications')
 // Load environment variables from .env file
 dotenv.config()
 
@@ -48,6 +48,7 @@ app.use("/api/v1/auth", userRoutes);
 app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/post", postRoutes);
+app.use("/api/v1/publication", publicationRoutes);
 app.get('/', (req , res)=>{
     res.send('Emerging tech server is up and running')
 })
