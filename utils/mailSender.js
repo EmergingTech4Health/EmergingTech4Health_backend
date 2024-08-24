@@ -14,7 +14,7 @@ const mailSender = async (email, subject, text) => {
             let info = await transporter.sendMail(
                 {
                     from: 'Emerging Tech4Health',
-                    to:`${email}`,
+                    to:'2021am8pi@mitsgwl.ac.in',
                     subject: `${subject}`,
                     html: `${text}`,
                 }
