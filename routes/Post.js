@@ -34,7 +34,7 @@ const {
 
 router.post("/createPost", auth , createPost);
 router.put("/updatePost", auth , updatePost);
-router.delete("/deletePost", auth,isSuperAdmin , deletePost);
+router.delete("/deletePost", auth, deletePost);
 router.get("/getAllPosts", getAllPosts);
 router.get("/getSinglePost/:postId", getSinglePost);
 
@@ -45,7 +45,7 @@ router.get("/getSinglePost/:postId", getSinglePost);
 
 router.post("/createSubPost", auth , createSubPost);
 router.put("/updateSubPost", auth , updateSubPost);
-router.delete("/deleteSubPost", auth, isSuperAdmin,deleteSubPost);
+router.delete("/deleteSubPost", auth, deleteSubPost);
 router.delete("/removeImageFromSubPost", auth, removeImageFromSubPost);
 
 // ********************************************************************************************************
@@ -54,7 +54,7 @@ router.delete("/removeImageFromSubPost", auth, removeImageFromSubPost);
 
 router.post("/createMilestone", auth , createMilestone);
 router.put("/updateMilestone", auth , updateMilestone);
-router.delete('/deleteMilestone',auth, isSuperAdmin, deleteMilestone);
+router.delete('/deleteMilestone',auth,  deleteMilestone);
 router.get('/getMilestones', getMilestones)
 
 // ********************************************************************************************************

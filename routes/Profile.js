@@ -14,7 +14,7 @@ const {
 //                                      Profile routes
 // ********************************************************************************************************
 
-router.delete("/deleteProfile", auth , isSuperAdmin , deleteProfile);
+router.delete("/deleteProfile", auth ,  deleteProfile);
 router.post("/createProfile", auth ,  createProfile);
 router.put("/updateProfile", auth , updateProfile);
 router.get('/profiles',  showAllProfiles);

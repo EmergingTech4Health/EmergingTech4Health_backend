@@ -10,6 +10,7 @@ const { cloudinaryConnect } = require("./config/cloudinary");
 const fileUpload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
 const publicationRoutes = require('./routes/Publications')
+const frontPageRoutes = require('./routes/FrontPage')
 // Load environment variables from .env file
 dotenv.config()
 
@@ -49,6 +50,7 @@ app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/post", postRoutes);
 app.use("/api/v1/publication", publicationRoutes);
+app.use("/api/v1/frontPage", frontPageRoutes);
 app.get('/', (req , res)=>{
     res.send('Emerging tech server is up and running')
 })
