@@ -11,6 +11,7 @@ const fileUpload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
 const publicationRoutes = require('./routes/Publications')
 const frontPageRoutes = require('./routes/FrontPage')
+const teamRoutes = require('./routes/Team')
 // Load environment variables from .env file
 dotenv.config()
 
@@ -51,6 +52,7 @@ app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/post", postRoutes);
 app.use("/api/v1/publication", publicationRoutes);
 app.use("/api/v1/frontPage", frontPageRoutes);
+app.use("/api/v1/team", teamRoutes);
 app.get('/', (req , res)=>{
     res.send('Emerging tech server is up and running')
 })
