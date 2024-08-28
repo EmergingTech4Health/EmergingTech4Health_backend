@@ -35,7 +35,14 @@ exports.addTeam = async (req, res) => {
 
   exports.showAllTeams = async (req, res) => {
     try {
-      const teams = await Team.find().populate('peoples', 'name email'); // Adjust the fields to populate as needed
+      const teams = await Team.find().populate({
+        path: 'peoples',
+        populate: [
+          { path: 'projects', select: 'title content' }, // Assuming `Post` schema has fields like `title` and `description`
+          { path: 'socialLinks' }, // Since socialLinks is embedded, it's included automatically
+        ],
+      });
+  
       return res.status(200).json({
         success: true,
         teams,
@@ -47,7 +54,8 @@ exports.addTeam = async (req, res) => {
         message: error.message,
       });
     }
-  }
+  };
+  
   
 
   exports.updateTeam = async (req, res) => {

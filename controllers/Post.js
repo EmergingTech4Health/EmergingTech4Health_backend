@@ -6,91 +6,138 @@ const Profile = require('../models/Profile');
 const {uploadImageToCloudinary} = require('../utils/imageUploader');
 // Create a new post
 exports.createPost = async (req, res) => {
-    try {
+  try {
       const { title, shortDesc, content, references, contributors, category, grant } = req.body;
-  
+      console.log(req.body);
+      
       if (!title || !shortDesc || !content || !references || !contributors || !category || !grant) {
-        return res.status(400).json({ error: "Please provide all required fields" });
+          return res.status(400).json({ error: "Please provide all required fields" });
       }
-  
+
       // Parse JSON fields
       const parsedContributors = JSON.parse(contributors);
       const parsedReferences = JSON.parse(references);
-  
+
       const contributorsExist = await Profile.find({ _id: { $in: parsedContributors } }).select('_id');
       if (contributorsExist.length !== parsedContributors.length) {
-        return res.status(400).json({ error: "One or more contributors do not exist" });
+          return res.status(400).json({ error: "One or more contributors do not exist" });
       }
-  
+
       const categoryExist = await Category.findById(category).select('_id');
       if (!categoryExist) {
-        return res.status(400).json({ error: "Category does not exist" });
+          return res.status(400).json({ error: "Category does not exist" });
       }
-  
+
       let imageUrl = null;
       if (req.files && req.files.image) {
-        const result = await uploadImageToCloudinary(req.files.image);
-        imageUrl = result.secure_url;
+          const result = await uploadImageToCloudinary(req.files.image);
+          imageUrl = result.secure_url;
       }
-  
+
       const post = new Post({
-        title,
-        shortDesc,
-        content,
-        references: parsedReferences,
-        contributors: parsedContributors,
-        category,
-        grant,
-        image: imageUrl,
+          title,
+          shortDesc,
+          content,
+          references: parsedReferences,
+          contributors: parsedContributors,
+          category,
+          grant,
+          image: imageUrl,
       });
-  
+
       await post.save();
-  
-      await Profile.updateMany({ _id: { $in: parsedContributors } }, { $push: { projects: post._id } });
-      await Category.findByIdAndUpdate(category, { $push: { projects: post._id } });
-  
+
+      // Update profiles with the new post ID
+      const updateProfilesPromise = Profile.updateMany(
+          { _id: { $in: parsedContributors } },
+          { $addToSet: { projects: post._id } }
+      );
+
+      // Update category with the new post ID
+      const updateCategoryPromise = Category.findByIdAndUpdate(
+          category,
+          { $addToSet: { projects: post._id } },
+          { new: true }
+      );
+
+      // Wait for both updates to complete
+      await Promise.all([updateProfilesPromise, updateCategoryPromise]);
+
       return res.status(201).json({ message: "Post created successfully", post });
-    } catch (error) {
+  } catch (error) {
       console.error("Error creating post:", error);
       return res.status(500).json({ error: "Internal server error" });
-    }
-  };
+  }
+};
   
   
 // update a post
 
 exports.updatePost = async (req, res) => {
-    try {
+  try {
       const { postId, title, shortDesc, content, references, contributors, category, grant } = req.body;
       const existPost = await Post.findById(postId);
       if (!existPost) {
-        return res.status(404).json({ error: "Post not found" });
+          return res.status(404).json({ error: "Post not found" });
       }
-  
+
       // Parse JSON fields
-      const parsedContributors = JSON.parse(contributors);
-      const parsedReferences = JSON.parse(references);
-  
+      const parsedContributors = contributors ? JSON.parse(contributors) : null;
+      const parsedReferences = references ? JSON.parse(references) : null;
+
+      // Store original contributors and category for comparison
+      const originalContributors = existPost.contributors;
+      const originalCategory = existPost.category;
+
+      // Update post fields
       if (title) existPost.title = title;
       if (content) existPost.content = content;
       if (shortDesc) existPost.shortDesc = shortDesc;
-      if (references) existPost.references = parsedReferences;
-      if (contributors) existPost.contributors = parsedContributors;
+      if (parsedReferences) existPost.references = parsedReferences;
+      if (parsedContributors) existPost.contributors = parsedContributors;
       if (category) existPost.category = category;
       if (grant) existPost.grant = grant;
-  
+
       if (req.files && req.files.image) {
-        const result = await uploadImageToCloudinary(req.files.image);
-        existPost.image = result.secure_url;
+          const result = await uploadImageToCloudinary(req.files.image);
+          existPost.image = result.secure_url;
       }
-  
+
+      // Save the updated post
       const updatedPost = await existPost.save();
+
+      // Update Profile documents if contributors have changed
+      if (parsedContributors) {
+          const contributorsToRemove = originalContributors.filter(c => !parsedContributors.includes(c.toString()));
+          const contributorsToAdd = parsedContributors.filter(c => !originalContributors.map(oc => oc.toString()).includes(c));
+
+          if (contributorsToRemove.length > 0) {
+              await Profile.updateMany(
+                  { _id: { $in: contributorsToRemove } },
+                  { $pull: { projects: postId } }
+              );
+          }
+
+          if (contributorsToAdd.length > 0) {
+              await Profile.updateMany(
+                  { _id: { $in: contributorsToAdd } },
+                  { $addToSet: { projects: postId } }
+              );
+          }
+      }
+
+      // Update Category documents if category has changed
+      if (category && category !== originalCategory.toString()) {
+          await Category.findByIdAndUpdate(originalCategory, { $pull: { projects: postId } });
+          await Category.findByIdAndUpdate(category, { $addToSet: { projects: postId } });
+      }
+
       return res.status(200).json({ message: "Post updated successfully", updatedPost });
-    } catch (error) {
+  } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Internal server error" });
-    }
-  };
+  }
+};
   
   
   
