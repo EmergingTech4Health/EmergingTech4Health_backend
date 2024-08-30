@@ -1,4 +1,5 @@
-
+const Video = require('../models/Videos');
+const SubPost = require('../models/subPost');
 exports.addVideo = async (req, res) => {
     try {
         const {subPostId ,title, description, videoUrl} = req.body;
@@ -19,7 +20,7 @@ exports.addVideo = async (req, res) => {
             $push: {videoUrls: video._id}
         }, {new: true}).populate('videoUrls');
        
-        res.status(201).json({success: true, video, message: "Video added successfully"});
+        res.status(201).json({success: true, video,updatedSubPost, message: "Video added successfully"});
         
     } catch (error) {
         console.error(error); // Log the error for debugging
@@ -74,4 +75,26 @@ exports.deleteVideo = async (req, res) => {
     }
 }
 
+exports.getVideos = async (req, res) => {
+    try {
+        // console.log("Received request for getVideos");
+        // console.log("req.query:", req.query);
+        
+        const { subPostId } = req.query;
+        // console.log("Extracted subPostId:", subPostId);
+
+        if (!subPostId) {
+            return res.status(400).json({ success: false, message: "subPostId is required" });
+        }
+
+        const subPost = await SubPost.findById(subPostId).populate('videoUrls');
+        if (!subPost) {
+            return res.status(404).json({ success: false, message: "Sub post not found" });
+        }
+        res.status(200).json({ success: true, videos: subPost.videoUrls });
+    } catch (error) {
+        console.error("Error in getVideos:", error);
+        res.status(500).json({ success: false, message: "Failed to get videos. Please try again." });
+    }
+}
 

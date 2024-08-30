@@ -181,22 +181,28 @@ exports.updatePost = async (req, res) => {
       }
   }
   exports.getSinglePost = async (req, res) => {
-      try {
-          const { postId } = req.params;
-          const post = await Post.findById(postId)
-              .populate('contributors')
-              .populate('category')
-              .populate('subPost')
-              .populate('milestones');
-  
-          if (!post) {
-              return res.status(404).json({ error: "Post not found" });
+    try {
+      const { postId } = req.params;
+      const post = await Post.findById(postId)
+        .populate('contributors')
+        .populate('category')
+        .populate({
+          path: 'subPost',
+          populate: {
+            path: 'videoUrls',
+            model: 'Video'
           }
-          res.status(200).json({ post });
-      } catch (error) {
-          console.error(error);
-          res.status(500).json({ error: "Internal server error" });
+        })
+        .populate('milestones');
+  
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
       }
+      res.status(200).json({ post });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal server error" });
+    }
   };
 
 // // Upload images to a post

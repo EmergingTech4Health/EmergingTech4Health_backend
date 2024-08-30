@@ -24,9 +24,9 @@ const {
     deleteMilestone,
     getMilestones,
 } = require('../controllers/Milestone')
-// const {
-//     addVideo,deleteVideo
-// } = require('../controllers/Video')
+const {
+    addVideo,deleteVideo,getVideos
+} = require('../controllers/Videos')
 
 // ********************************************************************************************************
 //                              POST ROUTES
@@ -60,7 +60,8 @@ router.get('/getMilestones', getMilestones)
 // ********************************************************************************************************
 //                              VIDEO ROUTES
 // ********************************************************************************************************
-// router.post("/addVideo", auth , addVideo);
-// router.delete("/deleteVideo", auth , deleteVideo);
+router.post("/addVideo", auth , addVideo);
+router.delete("/deleteVideo", auth , deleteVideo);
+router.get("/getVideos", getVideos);
 
 module.exports= router; 
