@@ -13,6 +13,7 @@ const publicationRoutes = require('./routes/Publications')
 const frontPageRoutes = require('./routes/frontPage')
 const teamRoutes = require('./routes/Team')
 const LogoRoutes = require('./routes/Logo')
+const ResearchProgressRoutes = require('./routes/ResearchProgress')
 // Load environment variables from .env file
 dotenv.config()
 
@@ -55,6 +56,7 @@ app.use("/api/v1/publication", publicationRoutes);
 app.use("/api/v1/frontPage", frontPageRoutes);
 app.use("/api/v1/team", teamRoutes);
 app.use("/api/v1/logo", LogoRoutes);
+app.use("/api/v1/researchProgress", ResearchProgressRoutes);
 app.get('/', (req , res)=>{
     res.send('Emerging tech server is up and running')
 })

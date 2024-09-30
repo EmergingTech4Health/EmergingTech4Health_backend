@@ -193,7 +193,8 @@ exports.updatePost = async (req, res) => {
             model: 'Video'
           }
         })
-        .populate('milestones');
+        .populate('milestones')
+        .populate('researchProgress');
   
       if (!post) {
         return res.status(404).json({ error: "Post not found" });

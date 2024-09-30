@@ -54,7 +54,10 @@ const PostSchema = new mongoose.Schema({
         type: String,
         // required: true
     },
-    
+    researchProgress:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'ResearchProgress'
+    },
     
 
 },
