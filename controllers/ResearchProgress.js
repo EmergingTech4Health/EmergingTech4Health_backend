@@ -2,10 +2,10 @@ const ResearchProgress = require('../models/ResearchProgress');
 const Profile = require('../models/Profile');
 const { uploadImageToCloudinary } = require('../utils/imageUploader');
 const Post = require('../models/Post');
-
+const mongoose = require('mongoose');
 exports.createResearchProgress = async (req, res) => {
     try {
-        const { postId , contributors ,description } = req.body;
+        const { postId, contributors, description } = req.body;
 
         let uploadedImageUrls = [];
         if (req.files && req.files.images) {
@@ -35,22 +35,34 @@ exports.createResearchProgress = async (req, res) => {
             });
         }
 
-        const existContributors = await Profile.find({ _id: { $in: contributors } });
-        if (existContributors.length !== contributors.length) {
-            return res.status(404).json({ error: "Contributors not found" });
+        // Parse contributors if it's a string
+        const parsedContributors = Array.isArray(contributors) ? contributors : JSON.parse(contributors);
+
+        // Validate that all contributor IDs are valid ObjectIds
+        const validContributors = parsedContributors.every(id => mongoose.Types.ObjectId.isValid(id));
+        if (!validContributors) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid contributor ID format"
+            });
         }
 
-
+        const existContributors = await Profile.find({ _id: { $in: parsedContributors } });
+        if (existContributors.length !== parsedContributors.length) {
+            return res.status(404).json({ error: "One or more contributors not found" });
+        }
 
         const researchProgress = await ResearchProgress.create({
-            contributors,
+            contributors: parsedContributors,
             description,
             imageUrls: uploadedImageUrls,
         });
 
-        const updatedPost = await Post.findByIdAndUpdate( postId, { researchProgress: researchProgress._id }, { new: true });
-
-
+        const updatedPost = await Post.findByIdAndUpdate(
+            postId,
+            { $push: { researchProgress: researchProgress._id } },
+            { new: true }
+        );
 
         return res.status(200).json({
             success: true,
@@ -101,7 +113,7 @@ exports.updateResearchProgress = async (req, res) => {
                 const result = await uploadImageToCloudinary(images[i]);
                 uploadedImageUrls.push(result.secure_url);
             }
-            existResearchProgress.imageUrls = uploadedImageUrls;
+            existResearchProgress.imageUrls.push(...uploadedImageUrls);
         }
 
         await existResearchProgress.save();
@@ -120,20 +132,22 @@ exports.updateResearchProgress = async (req, res) => {
     }
 };
 
-
 exports.getResearchProgress = async (req, res) => {
     try {
         const { postId } = req.body; // Get postId from body
-        // console.log(req.body);
+
+        // Fetch the post by ID
         const post = await Post.findById(postId);
         if (!post) {
             return res.status(404).json({ success: false, error: "Post not found" });
         }
-        const researchProgress = await ResearchProgress.findById(post.researchProgress).populate('contributors');
-        console.log(researchProgress);
+
+        // Fetch all research progress entries associated with this postId
+        const researchProgressList = await ResearchProgress.find({ _id: { $in: post.researchProgress } }).populate('contributors');
+        console.log(researchProgressList);
         return res.status(200).json({
             success: true,
-            researchProgress // Return the found research progress
+            researchProgress: researchProgressList // Return the list of research progress entries
         });
        
     } catch (error) {
@@ -144,6 +158,7 @@ exports.getResearchProgress = async (req, res) => {
         });
     }
 }
+
 
 
 exports.deleteSingleImage = async (req, res) => {
@@ -173,6 +188,47 @@ exports.deleteSingleImage = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Image cannot be deleted. Please try again."
+        });
+    }
+}
+
+
+exports.deleteResearchProgress = async (req, res) => {
+    try {
+        const { postId, researchProgressId } = req.body;
+
+        // Check if the research progress exists
+        const existResearchProgress = await ResearchProgress.findById(researchProgressId);
+        if (!existResearchProgress) {
+            return res.status(404).json({ error: "Research Progress not found" });
+        }
+
+        // Check if the post exists
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ error: "Post not found" });
+        }
+
+        // Update the post to remove the research progress ID
+        await Post.findByIdAndUpdate(
+            postId,
+            { $pull: { researchProgress: researchProgressId } },
+            { new: true }
+        );
+
+        // Delete the research progress document
+        await ResearchProgress.deleteOne({ _id: researchProgressId });
+
+        return res.status(200).json({
+            success: true,
+            message: "Research Progress deleted successfully"
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Research Progress cannot be deleted. Please try again."
         });
     }
 }

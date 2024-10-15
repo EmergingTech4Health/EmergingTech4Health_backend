@@ -54,10 +54,10 @@ const PostSchema = new mongoose.Schema({
         type: String,
         // required: true
     },
-    researchProgress:{
+    researchProgress:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'ResearchProgress'
-    },
+    }],
     
 
 },
